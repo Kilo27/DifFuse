@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Authors>Kilo27</Authors>
-    <Product>Mustang Rack</Product>
+    <Product>DifFuse</Product>
     <Version>0.1.0</Version>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>

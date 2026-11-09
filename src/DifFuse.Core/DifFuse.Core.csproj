@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>DifFuse.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DifFuse.Core.Tests" />
+    <InternalsVisibleTo Include="DifFuse.App.Tests" />
+  </ItemGroup>
+
+</Project>
