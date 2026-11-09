@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DifFuse.App/DifFuse.App.csproj" />
+    <Project Path="src/DifFuse.Core/DifFuse.Core.csproj" />
+    <Project Path="src/DifFuse.Hid/DifFuse.Hid.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DifFuse.App.Tests/DifFuse.App.Tests.csproj" />
+    <Project Path="tests/DifFuse.Core.Tests/DifFuse.Core.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/DifFuse.Probe/DifFuse.Probe.csproj" />
+  </Folder>
+</Solution>

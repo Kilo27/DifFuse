@@ -1,0 +1,73 @@
+<UserControl x:Class="DifFuse.App.Views.AmpUnitView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:DifFuse.App.Controls"
+             c:Knob.ArcBrush="{StaticResource AmpBrush}">
+    <Grid Margin="14,10,14,10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="172" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Model, cabinet, gate -->
+        <StackPanel Margin="0,0,16,0">
+            <StackPanel Orientation="Horizontal" Margin="0,2,0,8">
+                <Border Width="4" Height="18" CornerRadius="2" Background="{StaticResource AmpBrush}" Margin="0,0,8,0" />
+                <TextBlock Text="AMPLIFIER" Style="{StaticResource UnitTitle}" VerticalAlignment="Center" />
+            </StackPanel>
+            <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" DisplayMemberPath="DisplayName"
+                      AutomationProperties.Name="Amp model" ToolTip="Amp model" />
+
+            <Grid Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="58" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="6" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Cabinet" Style="{StaticResource PanelLabel}" TextAlignment="Left" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding CabinetNames}" SelectedIndex="{Binding Cabinet}" AutomationProperties.Name="Cabinet" />
+                <TextBlock Grid.Row="2" Text="Noise gate" Style="{StaticResource PanelLabel}" TextAlignment="Left" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding NoiseGateNames}" SelectedIndex="{Binding NoiseGate}" AutomationProperties.Name="Noise gate" />
+                <CheckBox Grid.Row="4" Grid.ColumnSpan="2" Style="{StaticResource LedCheck}" IsChecked="{Binding Brightness}" Content="BRIGHT"
+                          ToolTip="Bright switch" AutomationProperties.Name="Bright" />
+            </Grid>
+        </StackPanel>
+
+        <!-- Knobs -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <ItemsControl ItemsSource="{Binding MainKnobs}" ItemTemplate="{StaticResource KnobTemplate}" Focusable="False" c:Knob.Size="46">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" Columns="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+            <Grid Grid.Row="1" Margin="2,8,2,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="ADVANCED" Style="{StaticResource PanelLabel}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,8,0" />
+                <Border Grid.Column="1" Height="1" Background="#FF4E4A42" VerticalAlignment="Center" />
+            </Grid>
+            <ItemsControl Grid.Row="2" ItemsSource="{Binding AdvancedKnobs}" ItemTemplate="{StaticResource KnobTemplate}" Focusable="False" c:Knob.Size="36">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" Columns="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </Grid>
+    </Grid>
+</UserControl>

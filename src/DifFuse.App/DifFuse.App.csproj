@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>DifFuse</AssemblyName>
+    <RootNamespace>DifFuse.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\DifFuse.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DifFuse.Core\DifFuse.Core.csproj" />
+    <ProjectReference Include="..\DifFuse.Hid\DifFuse.Hid.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DifFuse.App.Tests" />
+    <Resource Include="Assets\DifFuse.ico" />
+  </ItemGroup>
+
+</Project>
