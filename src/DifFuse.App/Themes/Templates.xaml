@@ -7,6 +7,7 @@
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Controls.xaml" />
+        <ResourceDictionary Source="Brand.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <v:HiddenWhenFalseConverter x:Key="HiddenWhenFalse" />

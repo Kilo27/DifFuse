@@ -45,21 +45,12 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Wordmark: four lines running into one ring -->
+                <!-- Mark and name -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,26,0">
-                    <Canvas Width="30" Height="22" VerticalAlignment="Center" Margin="0,0,10,0">
-                        <Rectangle Canvas.Left="0" Canvas.Top="2.5" Width="20" Height="3" Fill="{StaticResource AmpBrush}" />
-                        <Rectangle Canvas.Left="0" Canvas.Top="7.5" Width="20" Height="3" Fill="{StaticResource StompBrush}" />
-                        <Rectangle Canvas.Left="0" Canvas.Top="12.5" Width="20" Height="3" Fill="{StaticResource ModBrush}" />
-                        <Rectangle Canvas.Left="0" Canvas.Top="17.5" Width="20" Height="3" Fill="{StaticResource DelayBrush}" />
-                        <Ellipse Canvas.Left="15" Canvas.Top="3.5" Width="15" Height="15" Stroke="{StaticResource TextPrimaryBrush}" StrokeThickness="3" Fill="{StaticResource ChromeBrush}" />
-                    </Canvas>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock FontStretch="Condensed" FontWeight="Bold" FontSize="23" LineHeight="23" LineStackingStrategy="BlockLineHeight">
-                            <Run Text="Dif" Foreground="{StaticResource TextPrimaryBrush}" /><Run Text="Fuse" Foreground="{StaticResource AccentBrush}" />
-                        </TextBlock>
-                        <TextBlock Text="MUSTANG AMP EDITOR" FontStretch="SemiCondensed" FontWeight="SemiBold" FontSize="10" Foreground="{StaticResource TextMutedBrush}" />
-                    </StackPanel>
+                    <Image Source="{StaticResource DifFuseMark}" Width="34" Height="34" VerticalAlignment="Center" Margin="0,0,11,0"
+                           AutomationProperties.Name="DifFuse logo" />
+                    <TextBlock Text="DifFuse" FontStretch="Condensed" FontWeight="Bold" FontSize="25" VerticalAlignment="Center"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,2" />
                 </StackPanel>
 
                 <!-- Now playing: slot and preset name, signed like a station -->

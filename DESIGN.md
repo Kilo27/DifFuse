@@ -1,6 +1,6 @@
 ---
 name: DifFuse
-description: Mustang amp editor drawn as a midnight transit diagram; the sound is a route, the amp is the interchange.
+description: An amp editor drawn as a midnight transit diagram; the sound is a route, the amp is the interchange.
 colors:
   enamel: "#0A1230"
   chrome: "#070D25"
@@ -103,7 +103,7 @@ components:
 
 ## Overview
 
-A Mustang amp editor drawn as a metro map fired in midnight-blue enamel. Guitar to speaker runs as one
+An amp editor drawn as a metro map fired in midnight-blue enamel. Guitar to speaker runs as one
 porcelain line across the top; each effect is a station in its own line ink, the amp is the ringed
 interchange, and the units below are the stations opened up. The world is flat enamel and porcelain line
 work: no photographs of gear, no screws, no brushed metal, no gradients, no glow.
@@ -204,6 +204,20 @@ centre. Clicking a station brings its unit into view and flashes its outline in 
 
 Preset slots and library presets are stops on a vertical line; the playing slot is the ringed interchange with
 an amber centre.
+
+### Logo
+
+The mark is the top of an archtop guitar: an **f-hole** (the f of DifFuse, and the opening sound diffuses out
+through), **six strings** of graduated gauge that spread from nut width at the top to bridge width at the bottom,
+and the **bridge** in amp amber, level with the f-hole's nicks, which is where luthiers place it. Porcelain on an
+enamel rounded square (radius 14 on a 64 grid). At 24 px and below the icon switches to a hinted drawing: three
+one-pixel strings on pixel centres and a two-pixel bridge.
+
+- The wordmark is "DifFuse" in Bahnschrift Condensed Bold, porcelain, with no tagline. The product will grow
+  beyond Mustang editing, so nothing in the lockup names one amp.
+- In the app, the mark is the `DifFuseMark` DrawingImage in `Themes/Brand.xaml`; the window and exe icon is
+  `Assets/DifFuse.ico`. Both come from `tools/DifFuse.Logo`; regenerate them together, never edit one by hand.
+- Amber appears only on the bridge. Do not recolour the strings with the unit inks or add a glow.
 
 ### Buttons
 
