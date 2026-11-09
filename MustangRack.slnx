@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MustangRack.Core/MustangRack.Core.csproj" />
+    <Project Path="src/MustangRack.Hid/MustangRack.Hid.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MustangRack.Core.Tests/MustangRack.Core.Tests.csproj" />
+  </Folder>
+</Solution>
