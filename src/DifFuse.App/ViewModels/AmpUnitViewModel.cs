@@ -11,7 +11,10 @@ public sealed record ModelOption(int Id, string Name, bool IsV2)
     public override string ToString() => DisplayName;
 }
 
-/// <summary>The amp unit: model, the main and advanced knobs, cabinet, noise gate and bright switch.</summary>
+/// <summary>
+/// The amp unit, grouped the way an amp is built: preamp, tone stack, power amp, noise gate, cabinet,
+/// plus the USB output level, which is not part of the tone.
+/// </summary>
 public sealed class AmpUnitViewModel : ObservableObject
 {
     private ModelOption? _selectedModel;
@@ -26,7 +29,7 @@ public sealed class AmpUnitViewModel : ObservableObject
         Gain = Knob("Gain");
         Gain2 = Knob("Gain 2");
         Volume = Knob("Volume");
-        MasterVolume = Knob("Master");
+        Master = Knob("Master");
         Treble = Knob("Treble");
         Middle = Knob("Middle");
         Bass = Knob("Bass");
@@ -37,8 +40,9 @@ public sealed class AmpUnitViewModel : ObservableObject
         Depth = Knob("Depth");
         UsbGain = Knob("USB Gain");
 
-        MainKnobs = [Gain, Gain2, Volume, MasterVolume, Treble, Middle, Bass, Presence];
-        AdvancedKnobs = [Bias, Sag, Threshold, Depth, UsbGain];
+        PreampKnobs = [Gain, Gain2, Volume];
+        EqKnobs = [Bass, Middle, Treble, Presence];
+        PowerKnobs = [Master, Bias, Sag];
         RebuildModels(ModelIdOrDefault);
         Load(new AmpSettings());
     }
@@ -49,7 +53,7 @@ public sealed class AmpUnitViewModel : ObservableObject
     public KnobViewModel Gain { get; }
     public KnobViewModel Gain2 { get; }
     public KnobViewModel Volume { get; }
-    public KnobViewModel MasterVolume { get; }
+    public KnobViewModel Master { get; }
     public KnobViewModel Treble { get; }
     public KnobViewModel Middle { get; }
     public KnobViewModel Bass { get; }
@@ -60,9 +64,17 @@ public sealed class AmpUnitViewModel : ObservableObject
     public KnobViewModel Depth { get; }
     public KnobViewModel UsbGain { get; }
 
-    public IReadOnlyList<KnobViewModel> MainKnobs { get; }
+    /// <summary>Gain stages and channel volume.</summary>
+    public IReadOnlyList<KnobViewModel> PreampKnobs { get; }
 
-    public IReadOnlyList<KnobViewModel> AdvancedKnobs { get; }
+    /// <summary>Tone stack, low to high.</summary>
+    public IReadOnlyList<KnobViewModel> EqKnobs { get; }
+
+    /// <summary>Master volume and how the power amp behaves.</summary>
+    public IReadOnlyList<KnobViewModel> PowerKnobs { get; }
+
+    /// <summary>True when the noise gate is Custom, the only setting that uses Threshold and Depth.</summary>
+    public bool IsCustomGate => _noiseGate == NoiseGates.Custom;
 
     public ObservableCollection<ModelOption> Models { get; } = new();
 
@@ -108,6 +120,7 @@ public sealed class AmpUnitViewModel : ObservableObject
         set
         {
             if (!SetProperty(ref _noiseGate, value)) return;
+            OnPropertyChanged(nameof(IsCustomGate));
             UpdateGateKnobs();
             RaiseChanged();
         }
@@ -137,7 +150,7 @@ public sealed class AmpUnitViewModel : ObservableObject
 
     private KnobViewModel Knob(string label, double max = 255, IReadOnlyList<string>? choices = null, Func<int, string>? format = null)
     {
-        var knob = new KnobViewModel(label, max, max >= 255 ? 128 : 0, choices, format);
+        var knob = new KnobViewModel(label, max, max >= 255 ? 128 : 0, choices, format, ControlGuide.ForAmp(label));
         knob.Changed += _ => RaiseChanged();
         return knob;
     }
@@ -193,7 +206,7 @@ public sealed class AmpUnitViewModel : ObservableObject
             Gain.Load(amp.Gain);
             Gain2.Load(amp.Gain2);
             Volume.Load(amp.Volume);
-            MasterVolume.Load(amp.MasterVolume);
+            Master.Load(amp.MasterVolume);
             Treble.Load(amp.Treble);
             Middle.Load(amp.Middle);
             Bass.Load(amp.Bass);
@@ -222,7 +235,7 @@ public sealed class AmpUnitViewModel : ObservableObject
         Gain = Gain.ByteValue,
         Gain2 = Gain2.ByteValue,
         Volume = Volume.ByteValue,
-        MasterVolume = MasterVolume.ByteValue,
+        MasterVolume = Master.ByteValue,
         Treble = Treble.ByteValue,
         Middle = Middle.ByteValue,
         Bass = Bass.ByteValue,

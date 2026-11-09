@@ -7,10 +7,15 @@ using System.Windows.Media;
 namespace DifFuse.App.Controls;
 
 /// <summary>
-/// A rotary knob. Drag up or down (Shift for fine steps), use the mouse wheel or the arrow keys,
-/// double-click to reset. Values are whole numbers between <see cref="RangeBase.Minimum"/> and
-/// <see cref="RangeBase.Maximum"/>; small ranges act as stepped selectors.
+/// A rotary knob for continuous amounts and for selectors with many positions. Drag up or down (Shift for fine
+/// steps), use the mouse wheel or the arrow keys, double-click to reset. Values are whole numbers between
+/// <see cref="RangeBase.Minimum"/> and <see cref="RangeBase.Maximum"/>; ranges of 24 or fewer steps click
+/// between detents.
 /// </summary>
+/// <remarks>
+/// Drawn as a transit interchange: a porcelain ring on the ground colour, the value arc in the unit's line
+/// colour with station ticks every tenth, and a marker where the arc ends.
+/// </remarks>
 public class Knob : RangeBase
 {
     private const double StartAngle = -135;
@@ -18,55 +23,27 @@ public class Knob : RangeBase
 
     public static readonly DependencyProperty DiameterProperty = DependencyProperty.Register(
         nameof(Diameter), typeof(double), typeof(Knob),
-        new FrameworkPropertyMetadata(44.0, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
+        new FrameworkPropertyMetadata(42.0, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
 
-    /// <summary>Value-arc colour. Inherited, so a rack unit can set it once for all its knobs.</summary>
+    /// <summary>Line colour of the value arc. Inherited, so a unit can set it once for all its controls.</summary>
     public static readonly DependencyProperty ArcBrushProperty = DependencyProperty.RegisterAttached(
         nameof(ArcBrush), typeof(Brush), typeof(Knob),
-        new FrameworkPropertyMetadata(new SolidColorBrush(Color.FromRgb(0xF2, 0xA4, 0x3A)),
+        new FrameworkPropertyMetadata(new SolidColorBrush(Color.FromRgb(0xFF, 0xC2, 0x0E)),
             FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits));
-
-    /// <summary>Knob diameter for a row of knobs, set on the ItemsControl that shows them.</summary>
-    public static readonly DependencyProperty SizeProperty = DependencyProperty.RegisterAttached(
-        "Size", typeof(double), typeof(Knob), new FrameworkPropertyMetadata(44.0));
 
     public static Brush GetArcBrush(DependencyObject d) => (Brush)d.GetValue(ArcBrushProperty);
 
     public static void SetArcBrush(DependencyObject d, Brush value) => d.SetValue(ArcBrushProperty, value);
 
-    public static double GetSize(DependencyObject d) => (double)d.GetValue(SizeProperty);
-
-    public static void SetSize(DependencyObject d, double value) => d.SetValue(SizeProperty, value);
-
     public static readonly DependencyProperty DefaultValueProperty = DependencyProperty.Register(
         nameof(DefaultValue), typeof(double), typeof(Knob), new PropertyMetadata(128.0));
 
-    private static readonly Pen TrackPen = Freeze(new Pen(new SolidColorBrush(Color.FromRgb(0x0B, 0x0C, 0x0E)), 3.2)
-    {
-        StartLineCap = PenLineCap.Round,
-        EndLineCap = PenLineCap.Round,
-    });
-
-    private static readonly Brush ShadowBrush = Freeze(new SolidColorBrush(Color.FromArgb(0x90, 0, 0, 0)));
-    private static readonly Pen RimPen = Freeze(new Pen(new SolidColorBrush(Color.FromRgb(0x0E, 0x0F, 0x11)), 1));
-    private static readonly Brush BodyBrush = Freeze(new LinearGradientBrush(
-        [new GradientStop(Color.FromRgb(0x5E, 0x62, 0x6A), 0), new GradientStop(Color.FromRgb(0x2A, 0x2C, 0x31), 0.55), new GradientStop(Color.FromRgb(0x1A, 0x1B, 0x1E), 1)],
-        new Point(0.3, 0), new Point(0.7, 1)));
-    private static readonly Brush CapBrush = Freeze(new RadialGradientBrush(
-        [new GradientStop(Color.FromRgb(0x46, 0x49, 0x50), 0), new GradientStop(Color.FromRgb(0x24, 0x26, 0x2A), 1)])
-    {
-        GradientOrigin = new Point(0.4, 0.3),
-    });
-    private static readonly Pen PointerPen = Freeze(new Pen(new SolidColorBrush(Color.FromRgb(0xF3, 0xEF, 0xE8)), 2.2)
-    {
-        StartLineCap = PenLineCap.Round,
-        EndLineCap = PenLineCap.Round,
-    });
-    private static readonly Brush TickBrush = Freeze(new SolidColorBrush(Color.FromRgb(0x6E, 0x72, 0x79)));
-    private static readonly Pen FocusPen = Freeze(new Pen(new SolidColorBrush(Color.FromRgb(0xF2, 0xA4, 0x3A)), 1.2)
-    {
-        DashStyle = new DashStyle([2, 2], 0),
-    });
+    private static readonly Pen TrackPen = Ink.Freeze(Ink.RoundPen(Ink.TrackBrush, 3.4));
+    private static readonly Pen RingPen = Ink.Freeze(new Pen(Ink.RingBrush, 1.7));
+    private static readonly Pen RingHoverPen = Ink.Freeze(new Pen(Ink.PorcelainBrush, 2.2));
+    private static readonly Pen PointerPen = Ink.Freeze(Ink.RoundPen(Ink.PorcelainBrush, 2.2));
+    private static readonly Pen MarkerPen = Ink.Freeze(new Pen(Ink.PorcelainBrush, 1.5));
+    private static readonly Pen FocusPen = Ink.Freeze(new Pen(Ink.PorcelainBrush, 1.3));
 
     private Point _dragStart;
     private double _dragStartValue;
@@ -123,48 +100,66 @@ public class Knob : RangeBase
         InvalidateVisual();
     }
 
-    protected override void OnIsKeyboardFocusWithinChanged(DependencyPropertyChangedEventArgs e)
+    protected override void OnMouseEnter(MouseEventArgs e)
     {
-        base.OnIsKeyboardFocusWithinChanged(e);
+        base.OnMouseEnter(e);
+        InvalidateVisual();
+    }
+
+    protected override void OnMouseLeave(MouseEventArgs e)
+    {
+        base.OnMouseLeave(e);
         InvalidateVisual();
     }
 
     protected override void OnRender(DrawingContext dc)
     {
         double size = Math.Min(ActualWidth, ActualHeight);
-        if (size <= 4) return;
+        if (size <= 8) return;
+
+        // Hit-testing covers the whole square, not only the painted ring.
+        dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
 
         var center = new Point(ActualWidth / 2, ActualHeight / 2);
-        double arcRadius = size / 2 - 2.5;
-        double bodyRadius = arcRadius - Math.Max(4.5, size * 0.11);
+        double arcRadius = size / 2 - 3;
+        double bodyRadius = arcRadius - Math.Max(6, size * 0.16);
         double fraction = Math.Clamp((Value - Minimum) / Range, 0, 1);
         double angle = StartAngle + fraction * Sweep;
+        var arcPen = Ink.RoundPen(ArcBrush, 3.4);
 
         dc.DrawGeometry(null, TrackPen, Arc(center, arcRadius, StartAngle, StartAngle + Sweep));
-        if (fraction > 0.002)
-        {
-            var arcPen = new Pen(ArcBrush, 3.2) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
-            dc.DrawGeometry(null, arcPen, Arc(center, arcRadius, StartAngle, angle));
-        }
+        if (fraction > 0.002) dc.DrawGeometry(null, arcPen, Arc(center, arcRadius, StartAngle, angle));
 
         if (IsStepped)
         {
+            // One detent per position: gaps in the coloured part, dots on the bare track.
             int steps = (int)Range;
             for (int i = 0; i <= steps; i++)
             {
-                var p = PointAt(center, arcRadius + 0.1, StartAngle + Sweep * i / steps);
-                dc.DrawEllipse(TickBrush, null, p, 1.1, 1.1);
+                double a = StartAngle + Sweep * i / steps;
+                bool passed = a <= angle + 0.01;
+                dc.DrawEllipse(passed ? Ink.GroundBrush : Ink.DetentBrush, null, PointAt(center, arcRadius, a), 1.5, 1.5);
+            }
+        }
+        else
+        {
+            // Station ticks every tenth, cut into the line.
+            for (int i = 1; i < 10; i++)
+            {
+                dc.DrawEllipse(Ink.PanelBrush, null, PointAt(center, arcRadius, StartAngle + Sweep * i / 10), 0.95, 0.95);
             }
         }
 
-        dc.DrawEllipse(ShadowBrush, null, new Point(center.X, center.Y + 1.6), bodyRadius + 0.5, bodyRadius + 0.5);
-        dc.DrawEllipse(BodyBrush, RimPen, center, bodyRadius, bodyRadius);
-        dc.DrawEllipse(CapBrush, null, center, bodyRadius * 0.7, bodyRadius * 0.7);
-        dc.DrawLine(PointerPen, PointAt(center, bodyRadius * 0.28, angle), PointAt(center, bodyRadius * 0.92, angle));
+        // Where the line ends: a small station in the line colour.
+        dc.DrawEllipse(ArcBrush, MarkerPen, PointAt(center, arcRadius, angle), 3.4, 3.4);
+
+        bool hot = IsMouseOver || _dragging;
+        dc.DrawEllipse(Ink.GroundBrush, hot ? RingHoverPen : RingPen, center, bodyRadius, bodyRadius);
+        dc.DrawLine(PointerPen, PointAt(center, bodyRadius * 0.2, angle), PointAt(center, bodyRadius * 0.78, angle));
 
         if (IsKeyboardFocused)
         {
-            dc.DrawEllipse(null, FocusPen, center, arcRadius + 2, arcRadius + 2);
+            dc.DrawEllipse(null, FocusPen, center, arcRadius + 3.6, arcRadius + 3.6);
         }
     }
 
@@ -205,6 +200,7 @@ public class Knob : RangeBase
         _dragStart = e.GetPosition(this);
         _dragStartValue = Value;
         _dragging = CaptureMouse();
+        InvalidateVisual();
         e.Handled = true;
     }
 
@@ -227,6 +223,7 @@ public class Knob : RangeBase
         {
             _dragging = false;
             ReleaseMouseCapture();
+            InvalidateVisual();
             e.Handled = true;
         }
     }
@@ -235,6 +232,7 @@ public class Knob : RangeBase
     {
         base.OnLostMouseCapture(e);
         _dragging = false;
+        InvalidateVisual();
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e)
@@ -270,12 +268,6 @@ public class Knob : RangeBase
     }
 
     protected override AutomationPeer OnCreateAutomationPeer() => new KnobAutomationPeer(this);
-
-    private static T Freeze<T>(T freezable) where T : Freezable
-    {
-        freezable.Freeze();
-        return freezable;
-    }
 
     private sealed class KnobAutomationPeer(Knob owner) : RangeBaseAutomationPeer(owner)
     {

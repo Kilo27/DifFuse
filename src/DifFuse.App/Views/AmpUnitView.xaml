@@ -2,72 +2,146 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:DifFuse.App.Controls"
+             xmlns:s="clr-namespace:DifFuse.App.Services"
+             xmlns:vm="clr-namespace:DifFuse.App.ViewModels"
              c:Knob.ArcBrush="{StaticResource AmpBrush}">
-    <Grid Margin="14,10,14,10">
+    <!--
+        The amp is the interchange of the signal path. Its controls are grouped the way an amp is built:
+        preamp, tone stack (low to high), power amp, noise gate. Cabinet and the USB output level, which
+        is not part of the tone, sit in the left column with the model.
+    -->
+    <Grid Margin="16,8,16,8">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="172" />
+            <ColumnDefinition Width="228" />
+            <ColumnDefinition Width="16" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Model, cabinet, gate -->
-        <StackPanel Margin="0,0,16,0">
-            <StackPanel Orientation="Horizontal" Margin="0,2,0,8">
-                <Border Width="4" Height="18" CornerRadius="2" Background="{StaticResource AmpBrush}" Margin="0,0,8,0" />
-                <TextBlock Text="AMPLIFIER" Style="{StaticResource UnitTitle}" VerticalAlignment="Center" />
+        <!-- Model, cabinet, USB out -->
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Height="30">
+                <Grid Width="22" Height="22" VerticalAlignment="Center" Margin="3,0,11,0">
+                    <Ellipse Stroke="{StaticResource TextPrimaryBrush}" StrokeThickness="4" Fill="{StaticResource WindowBgBrush}" />
+                    <Ellipse Width="7" Height="7" Fill="{StaticResource AmpBrush}" />
+                </Grid>
+                <TextBlock Text="AMP" Style="{StaticResource UnitTitle}" VerticalAlignment="Center" />
             </StackPanel>
-            <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" DisplayMemberPath="DisplayName"
-                      AutomationProperties.Name="Amp model" ToolTip="Amp model" />
+            <ComboBox Margin="0,5,0,0" ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" DisplayMemberPath="DisplayName"
+                      AutomationProperties.Name="Amp model"
+                      s:HintService.Title="Amp model" s:HintService.Text="{x:Static vm:ControlGuide.AmpModel}" />
 
-            <Grid Margin="0,10,0,0">
+            <TextBlock Text="CABINET" Style="{StaticResource PanelLabel}" TextAlignment="Left" Margin="1,9,0,3" />
+            <ComboBox ItemsSource="{Binding CabinetNames}" SelectedIndex="{Binding Cabinet}" AutomationProperties.Name="Cabinet"
+                      s:HintService.Title="Cabinet" s:HintService.Text="{x:Static vm:ControlGuide.Cabinet}" />
+
+            <Grid Margin="0,11,0,0" Background="Transparent"
+                  s:HintService.Title="USB out" s:HintService.Text="{Binding UsbGain.Help}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="58" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="6" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="8" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Text="Cabinet" Style="{StaticResource PanelLabel}" TextAlignment="Left" VerticalAlignment="Center" />
-                <ComboBox Grid.Column="1" ItemsSource="{Binding CabinetNames}" SelectedIndex="{Binding Cabinet}" AutomationProperties.Name="Cabinet" />
-                <TextBlock Grid.Row="2" Text="Noise gate" Style="{StaticResource PanelLabel}" TextAlignment="Left" VerticalAlignment="Center" />
-                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding NoiseGateNames}" SelectedIndex="{Binding NoiseGate}" AutomationProperties.Name="Noise gate" />
-                <CheckBox Grid.Row="4" Grid.ColumnSpan="2" Style="{StaticResource LedCheck}" IsChecked="{Binding Brightness}" Content="BRIGHT"
-                          ToolTip="Bright switch" AutomationProperties.Name="Bright" />
+                <TextBlock Text="USB OUT" Style="{StaticResource PanelLabel}" TextAlignment="Left" Margin="1,0,0,0" />
+                <TextBlock Grid.Column="1" Text="{Binding UsbGain.DisplayValue}" Style="{StaticResource KnobValueText}" />
+                <Slider Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource LineSlider}" Value="{Binding UsbGain.Value}" Margin="0,2,0,0"
+                        AutomationProperties.Name="USB output level" AutomationProperties.HelpText="{Binding UsbGain.Help}" />
             </Grid>
         </StackPanel>
 
-        <!-- Knobs -->
-        <Grid Grid.Column="1">
+        <!-- Controls -->
+        <Grid Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <ItemsControl ItemsSource="{Binding MainKnobs}" ItemTemplate="{StaticResource KnobTemplate}" Focusable="False" c:Knob.Size="46">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Preamp -->
+            <ContentControl Style="{StaticResource GroupHeader}" Content="PREAMP" />
+            <UniformGrid Grid.Row="1" Rows="1" Columns="4">
+                <ContentControl Content="{Binding Gain}" ContentTemplate="{StaticResource KnobCell}" Focusable="False" />
+                <ContentControl Content="{Binding Gain2}" ContentTemplate="{StaticResource KnobCell}" Focusable="False" />
+                <ContentControl Content="{Binding Volume}" ContentTemplate="{StaticResource KnobCell}" Focusable="False" />
+                <Grid Style="{StaticResource ControlCell}" s:HintService.Title="Bright" s:HintService.Text="{x:Static vm:ControlGuide.Bright}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="16" />
+                        <RowDefinition Height="46" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="BRIGHT" Style="{StaticResource PanelLabel}" VerticalAlignment="Bottom" />
+                    <ToggleButton Grid.Row="1" Style="{StaticResource LineSwitch}" IsChecked="{Binding Brightness}"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center" AutomationProperties.Name="Bright" />
+                    <TextBlock Grid.Row="2">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource KnobValueText}">
+                                <Setter Property="Text" Value="Off" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Brightness}" Value="True">
+                                        <Setter Property="Text" Value="On" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </UniformGrid>
+
+            <!-- Tone stack, low to high -->
+            <ContentControl Grid.Column="1" Style="{StaticResource GroupHeader}" Content="EQ" Margin="10,0,2,4" />
+            <ItemsControl Grid.Row="1" Grid.Column="1" ItemsSource="{Binding EqKnobs}" ItemTemplate="{StaticResource KnobCell}" Focusable="False" Margin="8,0,0,0">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Rows="1" Columns="8" />
+                        <UniformGrid Rows="1" Columns="4" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
-            <Grid Grid.Row="1" Margin="2,8,2,6">
+
+            <!-- Power amp and noise gate -->
+            <Grid Grid.Row="3" Grid.RowSpan="2" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.4*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="1.1*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="ADVANCED" Style="{StaticResource PanelLabel}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,8,0" />
-                <Border Grid.Column="1" Height="1" Background="#FF4E4A42" VerticalAlignment="Center" />
+
+                <ContentControl Grid.ColumnSpan="3" Style="{StaticResource GroupHeader}" Content="POWER AMP" />
+                <ContentControl Grid.Row="1" Content="{Binding Master}" ContentTemplate="{StaticResource KnobCell}" Focusable="False" />
+                <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding Bias}" ContentTemplate="{StaticResource KnobCell}" Focusable="False" />
+                <ContentControl Grid.Row="1" Grid.Column="2" Content="{Binding Sag}" ContentTemplate="{StaticResource KnobCell}" Focusable="False" />
+
+                <ContentControl Grid.Column="4" Grid.ColumnSpan="3" Style="{StaticResource GroupHeader}" Content="NOISE GATE" />
+                <Grid Grid.Row="1" Grid.Column="4" Style="{StaticResource ControlCell}"
+                      s:HintService.Title="Noise gate" s:HintService.Text="{x:Static vm:ControlGuide.NoiseGate}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="16" />
+                        <RowDefinition Height="46" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="GATE" Style="{StaticResource PanelLabel}" VerticalAlignment="Bottom" />
+                    <c:StopSelector Grid.Row="1" Grid.RowSpan="2" Value="{Binding NoiseGate}" Maximum="5" Labels="{Binding NoiseGateNames}"
+                                    Height="36" VerticalAlignment="Top" Margin="0,14,0,0"
+                                    AutomationProperties.Name="Noise gate" AutomationProperties.HelpText="{x:Static vm:ControlGuide.NoiseGate}" />
+                </Grid>
+                <ContentControl Grid.Row="1" Grid.Column="5" Content="{Binding Threshold}" ContentTemplate="{StaticResource KnobCell}" Focusable="False" />
+                <ContentControl Grid.Row="1" Grid.Column="6" Content="{Binding Depth}" ContentTemplate="{StaticResource KnobCell}" Focusable="False" />
             </Grid>
-            <ItemsControl Grid.Row="2" ItemsSource="{Binding AdvancedKnobs}" ItemTemplate="{StaticResource KnobTemplate}" Focusable="False" c:Knob.Size="36">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Rows="1" Columns="8" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
         </Grid>
     </Grid>
 </UserControl>

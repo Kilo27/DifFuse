@@ -1,8 +1,11 @@
 # DifFuse
 
-A Windows 11 desktop app for Fender Mustang amps over USB. It replaces the discontinued Fender FUSE
-with a dark, guitarix-style rack: an amp unit and four effect units with real knobs. All sound comes
-from the amp's own DSP; DifFuse only edits and stores presets.
+A Windows 11 desktop app for Fender Mustang amps over USB. It replaces the discontinued Fender FUSE.
+The sound is drawn as a route, like a metro map: guitar to speaker, one station per effect, the amp as the
+interchange, and below it the amp unit and four effect units. Each control's shape matches what it does:
+amounts turn, a few named positions (Sag, noise gate, Shape, Mode) are stops on a line, off/on is a switch,
+and the bar at the bottom explains whatever control you point at. All sound comes from the amp's own DSP;
+DifFuse only edits and stores presets.
 
 ## Features
 
@@ -69,7 +72,7 @@ dotnet test DifFuse.slnx
 | --- | --- |
 | `src/DifFuse.Core` | Packet codec, amp/effect catalogs, protocol worker, connection manager, simulated amp, FUSE files, library. No UI. |
 | `src/DifFuse.Hid` | Windows HID transport (SetupAPI + hid.dll, 65-byte reports). |
-| `src/DifFuse.App` | WPF app: rack UI, custom knob control, dialogs. |
+| `src/DifFuse.App` | WPF app: route map, amp and effect units, custom knob and stop controls, dialogs. |
 | `tests/DifFuse.Core.Tests` | Protocol, FUSE, library and reconnect tests against the simulated amp. |
 | `tests/DifFuse.App.Tests` | View-model tests, including "never save to the amp without confirmation". |
 

@@ -34,6 +34,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         Amp = new AmpUnitViewModel();
         Amp.Changed += OnAmpEdited;
+        Amp.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(AmpUnitViewModel.SelectedModel)) UpdateChain();
+        };
         Effects = EffectFamilies.All.Select(f => new EffectUnitViewModel(f)).ToList();
         foreach (var unit in Effects) unit.Changed += OnEffectEdited;
 
@@ -364,7 +368,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         IsEdited = true;
         _client?.QueueEffect(unit.ToSettings());
-        UpdateChain();
+        if (change != EffectChange.Knob) UpdateChain();
     }
 
     private void LoadIntoRack(Preset preset)
@@ -388,7 +392,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Chain.Add(ChainItem(unit));
             unit.ChainPosition = position++;
         }
-        Chain.Add(new ChainItemViewModel("AMP", "AmpBrush", true, true, Amp.SelectedModel?.Name ?? "Amp"));
+        string ampName = Amp.SelectedModel?.Name ?? "Amp";
+        Chain.Add(new ChainItemViewModel("AMP", "AmpBrush", true, true, $"Amp: {ampName}", ampName));
         position++;
         foreach (var unit in post)
         {
@@ -399,7 +404,13 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private static ChainItemViewModel ChainItem(EffectUnitViewModel unit)
     {
-        string state = !unit.HasModel ? "empty" : unit.IsOn ? "on" : "bypassed";
+        var state = !unit.HasModel ? ChainItemState.Empty : unit.IsOn ? ChainItemState.On : ChainItemState.Bypassed;
+        string detail = state switch
+        {
+            ChainItemState.Empty => "No effect",
+            ChainItemState.Bypassed => $"Bypassed · {unit.SelectedModel.Name}",
+            _ => unit.SelectedModel.Name,
+        };
         string label = unit.Family switch
         {
             EffectFamily.Stomp => "STOMP",
@@ -407,8 +418,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             EffectFamily.Delay => "DELAY",
             _ => "REVERB",
         };
+        string stateText = state switch
+        {
+            ChainItemState.Empty => "empty",
+            ChainItemState.Bypassed => "bypassed",
+            _ => "on",
+        };
         return new ChainItemViewModel(label, unit.AccentKey, unit.IsActive, false,
-            $"{unit.Family.DisplayName()}: {unit.SelectedModel.Name} ({state}), {(unit.IsPostAmp ? "after" : "before")} the amp");
+            $"{unit.Family.DisplayName()}: {unit.SelectedModel.Name} ({stateText}), {(unit.IsPostAmp ? "after" : "before")} the amp",
+            detail, state, unit.Family);
     }
 
     public void Dispose() => _connection.Dispose();
