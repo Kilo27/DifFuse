@@ -1,6 +1,9 @@
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using DifFuse.App.Services;
 using DifFuse.App.ViewModels;
 
@@ -82,5 +85,47 @@ public partial class MainWindow : Window
             _viewModel.Library.LoadCommand.Execute(null);
             e.Handled = true;
         }
+    }
+
+    /// <summary>A station on the route was clicked: bring its unit into view and light its outline briefly.</summary>
+    private void Station_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: ChainItemViewModel station }) return;
+
+        ContentControl? panel = AmpPanel;
+        if (station.Family is { } family)
+        {
+            var unit = _viewModel.Effects.First(u => u.Family == family);
+            panel = EffectList.ItemContainerGenerator.ContainerFromItem(unit) is DependencyObject container
+                ? FindChild<ContentControl>(container)
+                : null;
+        }
+        if (panel is null) return;
+
+        panel.BringIntoView();
+        if (panel.Template.FindName("Bd", panel) is Border border && TryFindResource(station.AccentKey) is SolidColorBrush ink &&
+            TryFindResource("PanelLineColor") is Color rest)
+        {
+            var brush = new SolidColorBrush(ink.Color);
+            border.BorderBrush = brush;
+            var fade = new ColorAnimation(ink.Color, rest, TimeSpan.FromMilliseconds(1100))
+            {
+                BeginTime = TimeSpan.FromMilliseconds(250),
+                EasingFunction = new ExponentialEase { EasingMode = EasingMode.EaseOut },
+            };
+            fade.Completed += (_, _) => border.ClearValue(Border.BorderBrushProperty);
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, fade);
+        }
+    }
+
+    private static T? FindChild<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match) return match;
+            if (FindChild<T>(child) is { } deeper) return deeper;
+        }
+        return null;
     }
 }

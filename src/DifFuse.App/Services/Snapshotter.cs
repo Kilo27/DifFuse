@@ -97,6 +97,17 @@ internal static class Snapshotter
             var rack = (FrameworkElement)window.FindName("RackPanel");
             Save(RenderDetached(rack, rack.ActualWidth), Path.Combine(outputDir, "rack-full-980.png"));
 
+            // The other control kinds: stops (Type, Mode), stepped knobs (Pitch, Key, Scale), a gate that is not Custom.
+            vm.Stomp.SelectedModel = vm.Stomp.Models.First(m => m.Id == 0x88); // Simple Comp
+            vm.Modulation.SelectedModel = vm.Modulation.Models.First(m => m.Id == 0x101f); // Diatonic Pitch
+            vm.Delay.SelectedModel = vm.Delay.Models.First(m => m.Id == 0x44); // Multitap Delay
+            vm.Delay.IsOn = true;
+            vm.Amp.NoiseGate = 2;
+            window.Width = 1320;
+            window.Height = 860;
+            await Idle();
+            Save(Render((FrameworkElement)window.Content), Path.Combine(outputDir, "controls-1320x860.png"));
+
             // Library tab.
             var tabs = (TabControl)window.FindName("SidebarTabs");
             tabs.SelectedIndex = 1;

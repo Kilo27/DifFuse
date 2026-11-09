@@ -44,6 +44,9 @@ public sealed class EffectUnitViewModel : ObservableObject
 
     public string Title => Family.DisplayName().ToUpperInvariant();
 
+    /// <summary>Where the unit sits in the signal path, in words.</summary>
+    public string PlacementText => _isPostAmp ? "After the amp" : "Before the amp";
+
     public string AccentKey => Family switch
     {
         EffectFamily.Stomp => "StompBrush",
@@ -103,7 +106,9 @@ public sealed class EffectUnitViewModel : ObservableObject
         get => _isPostAmp;
         set
         {
-            if (SetProperty(ref _isPostAmp, value)) RaiseChanged(EffectChange.Placement);
+            if (!SetProperty(ref _isPostAmp, value)) return;
+            OnPropertyChanged(nameof(PlacementText));
+            RaiseChanged(EffectChange.Placement);
         }
     }
 
@@ -170,7 +175,7 @@ public sealed class EffectUnitViewModel : ObservableObject
             if (model is not null && i < model.Knobs.Count)
             {
                 var def = model.Knobs[i];
-                knob.Redefine(def.Label, def.Max, def.Choices);
+                knob.Redefine(def.Label, def.Max, def.Choices, help: ControlGuide.ForEffect(Family, model.Name, def.Label));
                 knob.IsVisible = true;
                 knob.IsEnabled = true;
             }
@@ -197,7 +202,7 @@ public sealed class EffectUnitViewModel : ObservableObject
             for (int i = 0; i < Knobs.Count; i++) Knobs[i].Load(effect.Knobs[i]);
             SetOn(effect.Enabled && effect.ModelId != 0);
             _slot = effect.Slot;
-            SetProperty(ref _isPostAmp, effect.IsPostAmp, nameof(IsPostAmp));
+            if (SetProperty(ref _isPostAmp, effect.IsPostAmp, nameof(IsPostAmp))) OnPropertyChanged(nameof(PlacementText));
         }
         finally
         {
@@ -209,7 +214,7 @@ public sealed class EffectUnitViewModel : ObservableObject
     public void SetSlot(byte slot)
     {
         _slot = slot;
-        SetProperty(ref _isPostAmp, slot >= 4, nameof(IsPostAmp));
+        if (SetProperty(ref _isPostAmp, slot >= 4, nameof(IsPostAmp))) OnPropertyChanged(nameof(PlacementText));
     }
 
     public EffectSettings ToSettings() => new()

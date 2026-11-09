@@ -28,9 +28,7 @@ public partial class PromptDialog : Window
 
         if (destructive)
         {
-            ConfirmButton.Style = (Style)FindResource("RackButton");
-            ConfirmButton.Background = new SolidColorBrush(Color.FromRgb(0x8E, 0x2A, 0x22));
-            ConfirmButton.BorderBrush = (Brush)FindResource("DangerBrush");
+            ConfirmButton.Style = (Style)FindResource("DangerButton");
         }
 
         if (inputLabel is not null)

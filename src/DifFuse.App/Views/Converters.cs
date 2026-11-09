@@ -59,7 +59,17 @@ public sealed class ConnectionLedConverter : IValueConverter
 public sealed class ActiveOpacityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-        value is true ? 1.0 : 0.5;
+        value is true ? 1.0 : 0.42;
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
+
+/// <summary>Upper-cases a label, the way stations are signed.</summary>
+public sealed class UpperConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
+        (value as string)?.ToUpper(culture) ?? "";
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
+}
+

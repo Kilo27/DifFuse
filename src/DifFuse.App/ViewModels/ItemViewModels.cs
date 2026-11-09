@@ -1,4 +1,5 @@
 using System.Globalization;
+using DifFuse.Core.Models;
 
 namespace DifFuse.App.ViewModels;
 
@@ -30,7 +31,23 @@ public sealed class PresetSlotViewModel(int index, string name) : ObservableObje
     }
 }
 
-/// <summary>One stage of the signal-chain strip above the rack.</summary>
-public sealed record ChainItemViewModel(string Label, string AccentKey, bool IsActive, bool IsAmp, string ToolTip);
+public enum ChainItemState
+{
+    On,
+    Bypassed,
+    Empty,
+}
+
+/// <summary>One station on the signal route above the units.</summary>
+/// <param name="Label">Short name of the unit (STOMP, MOD, AMP, ...).</param>
+/// <param name="Detail">The model the unit runs, or why it is silent.</param>
+/// <param name="Family">The effect family, or null for the amp.</param>
+public sealed record ChainItemViewModel(string Label, string AccentKey, bool IsActive, bool IsAmp, string ToolTip,
+    string Detail = "", ChainItemState State = ChainItemState.On, EffectFamily? Family = null)
+{
+    public bool IsBypassed => State == ChainItemState.Bypassed;
+
+    public bool IsEmpty => State == ChainItemState.Empty;
+}
 
 public sealed record SaveToAmpChoice(int Slot, string Name);
